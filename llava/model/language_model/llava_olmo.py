@@ -22,25 +22,27 @@ from torch.nn import CrossEntropyLoss
 from transformers import AutoConfig, AutoModelForCausalLM
 from transformers.modeling_outputs import CausalLMOutputWithPast
 
-from .stablelm.modeling_stablelm_epoch import StableLMEpochConfig, StableLMEpochForCausalLM, StableLMEpochModel
+
+from hf_olmo import OLMoConfig, OLMoForCausalLM
+from olmo.model import Olmo
 from ..llava_arch import LlavaMetaModel, LlavaMetaForCausalLM
 
-class LlavaConfig(StableLMEpochConfig):
-    model_type = "llava_stablelm_epoch"
+class LlavaConfig(OLMoConfig):
+    model_type = "olmo"
 
 
-class LlavaStableLMEpochModel(LlavaMetaModel, StableLMEpochModel):
+class LlavaStableLMEpochModel(LlavaMetaModel, Olmo):
     config_class = LlavaConfig
 
     def __init__(self, config: LlavaConfig):
-        super(LlavaStableLMEpochModel, self).__init__(config)
+        super(Olmo, self).__init__(config)
 
-class LlavaStableLMEpochForCausalLM(StableLMEpochForCausalLM, LlavaMetaForCausalLM):
+class LlavaOLMoForCausalLM(OLMoForCausalLM, LlavaMetaForCausalLM):
     config_class = LlavaConfig
 
     def __init__(self, config):
-        super(StableLMEpochForCausalLM, self).__init__(config)
-        self.model = LlavaStableLMEpochModel(config)
+        super(OLMoForCausalLM, self).__init__(config)
+        self.model = OLMoForCausalLM(config)
 
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
@@ -133,5 +135,5 @@ class LlavaStableLMEpochForCausalLM(StableLMEpochForCausalLM, LlavaMetaForCausal
         )
         return model_inputs
 
-AutoConfig.register("llava_stablelm_epoch", LlavaConfig)
+AutoConfig.register("llava_olmo", LlavaConfig)
 AutoModelForCausalLM.register(LlavaConfig, LlavaStableLMEpochForCausalLM)
